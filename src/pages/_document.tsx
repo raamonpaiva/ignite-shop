@@ -1,6 +1,7 @@
 /** O _document é como se fosse o index.html do create-react-app, porém as principais tags html, são componentes */
-import { getCssText } from '@/styles'
 import { Head, Html, Main, NextScript } from 'next/document'
+import { getCssText } from '@/styles'
+
 
 export default function Document() {
   return (
