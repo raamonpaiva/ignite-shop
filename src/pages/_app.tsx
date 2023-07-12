@@ -21,7 +21,6 @@ export default function App({ Component, pageProps }: AppProps) {
           height={52}
           alt='Logo Ignite'
         />
-
       </Header>
 
       <Component {...pageProps} />
