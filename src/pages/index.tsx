@@ -1,15 +1,25 @@
 import { HomeContainer, Product } from "@/styles/pages/home";
-import Image from "next/image";
 
 import 'keen-slider/keen-slider.min.css';
 import { useKeenSlider } from 'keen-slider/react';
 
-import cam1 from '../assets/cam1.png';
-import cam2 from '../assets/cam2.png';
-import cam3 from '../assets/cam3.png';
-import cam4 from '../assets/cam4.png';
+import { stripe } from "@/lib/stripe";
+import { GetServerSideProps } from "next";
 
-export default function Home() {
+import Image from "next/image";
+import Stripe from "stripe";
+
+
+interface HomeProps {
+  products: {
+    id: string,
+    name: string,
+    imageUrl: string,
+    price: number
+  }[]
+}
+
+export default function Home({ products }: HomeProps) {
 
   const [sliderRef] = useKeenSlider({
     slides: {
@@ -20,43 +30,44 @@ export default function Home() {
 
   return (
     <HomeContainer ref={sliderRef} className="keen-slider">
-      <Product className="keen-slider__slide">
-        <Image src={cam1} width={520} height={480} alt="" />
-        <footer>
-          <strong>Camiseta X</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-
-      <Product className="keen-slider__slide">
-        <Image src={cam2} width={520} height={480} alt="" />
-        <footer>
-          <strong>Camiseta Y</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={cam3} width={520} height={480} alt="" />
-        <footer>
-          <strong>Camiseta Z</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
-      <Product className="keen-slider__slide">
-        <Image src={cam4} width={520} height={480} alt="" />
-        <footer>
-          <strong>Camiseta W</strong>
-          <span>R$ 79,90</span>
-        </footer>
-      </Product>
-
+      {products.map(product => {
+        return (
+          <Product key={product.id} className="keen-slider__slide">
+            <Image src={product.imageUrl} width={520} height={480} alt="" />
+            <footer>
+              <strong>{product.name}</strong>
+              <span>{product.price}</span>
+            </footer>
+          </Product>
+        )
+      })}
     </HomeContainer>
   )
 }
 
-export const getServerSideProps = async () => {
-  await new Promise(resolve => setTimeout(resolve, 1000))
+/** Utiliza o getServerSideProps para pegar as chaves publicas, pois como essa função roda
+ * do lado do servidor node do SSR, o usuário não tem acesso a estas informações
+ */
+export const getServerSideProps: GetServerSideProps = async () => {
+  const response = await stripe.products.list({
+    expand: ['data.default_price']
+  })
+
+  const products = response.data.map(product => {
+    const price = product.default_price as Stripe.Price
+
+    return {
+      id: product.id,
+      name: product.name,
+      imageUrl: product.images[0],
+      price: price.unit_amount / 100,
+
+    }
+  })
+
+  return {
+    props: {
+      products,
+    }
+  }
 }
