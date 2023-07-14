@@ -49,6 +49,7 @@ export default function Home({ products }: HomeProps) {
  * mais rapidamente para o usuário.
  */
 export const getStaticProps: GetStaticProps = async () => {
+  // Pegando dados do Sttipe utilizando a API Stripe
   const response = await stripe.products.list({
     expand: ['data.default_price']
   })
@@ -60,7 +61,10 @@ export const getStaticProps: GetStaticProps = async () => {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: price.unit_amount as number / 100,
+      price: new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }).format(price.unit_amount as number / 100)
 
     }
   })
