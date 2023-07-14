@@ -4,8 +4,8 @@ import 'keen-slider/keen-slider.min.css';
 import { useKeenSlider } from 'keen-slider/react';
 
 import { stripe } from "@/lib/stripe";
-import { GetServerSideProps } from "next";
 
+import { GetStaticProps } from "next";
 import Image from "next/image";
 import Stripe from "stripe";
 
@@ -45,10 +45,10 @@ export default function Home({ products }: HomeProps) {
   )
 }
 
-/** Utiliza o getServerSideProps para pegar as chaves publicas, pois como essa função roda
- * do lado do servidor node do SSR, o usuário não tem acesso a estas informações
+/** Utiliza o getStaticProps para pegar os dados do produto e utiliza o conceito de SSG, para deixa-los disponiveis,
+ * mais rapidamente para o usuário.
  */
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getStaticProps: GetStaticProps = async () => {
   const response = await stripe.products.list({
     expand: ['data.default_price']
   })
@@ -60,7 +60,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
       id: product.id,
       name: product.name,
       imageUrl: product.images[0],
-      price: price.unit_amount / 100,
+      price: price.unit_amount as number / 100,
 
     }
   })
@@ -68,6 +68,9 @@ export const getServerSideProps: GetServerSideProps = async () => {
   return {
     props: {
       products,
-    }
+    },
+    // Revalidate dita em quanto tempo a pagina da um refresh a partir do acesso de um usuário
+    revalidate: 60 * 60 * 2
   }
+
 }
