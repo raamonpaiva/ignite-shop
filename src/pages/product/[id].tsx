@@ -1,16 +1,18 @@
 import { stripe } from "@/lib/stripe";
 import { ImageContainer, ProductContainer, ProductDetails } from "@/styles/pages/product";
-import { GetStaticProps } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import Image from "next/image";
 import Stripe from "stripe";
 
 interface ProductProps {
+  product: {
     id: string,
     name: string,
     imageUrl: string,
     price: string,
     description: string
   }
+}
 
 
 export default function Product(product: ProductProps) {
@@ -19,14 +21,14 @@ export default function Product(product: ProductProps) {
 
     <ProductContainer>
       <ImageContainer>
-        <Image src={product.imageUrl} width={520} height={480} alt="" />
+        <Image src={product.product.imageUrl} width={520} height={480} alt="" />
       </ImageContainer>
 
       <ProductDetails>
-        <h1>{product.name}</h1>
-        <span>{product.price}</span>
+        <h1>{product.product.name}</h1>
+        <span>{product.product.price}</span>
 
-        <p>{product.description}</p>
+        <p>{product.product.description}</p>
 
         <button>
           Comprar Agora
@@ -34,6 +36,18 @@ export default function Product(product: ProductProps) {
       </ProductDetails>
     </ProductContainer>
   )
+}
+
+/** Para gerar paginas estaticas com parametros é necessario utilizar o getStatiPaths, porque ele procura e retorna uma
+ * pagina para determinado id
+ */
+export const getStaticPaths: GetStaticPaths = async () => {
+  return {
+    paths: [
+      { params: { id: 'prod_OGHjkDL0AqcapZ' } }
+    ],
+    fallback: false
+  }
 }
 
 export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ params }) => {
@@ -60,6 +74,5 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
         description: product.description
       }
     },
-    revalidade: 60 * 60 * 1 // 1 hour
   }
 }
