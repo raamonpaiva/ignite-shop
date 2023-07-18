@@ -11,7 +11,8 @@ interface ProductProps {
     name: string,
     imageUrl: string,
     price: string,
-    description: string
+    description: string,
+    defaultPriceId: string
   }
 }
 
@@ -76,7 +77,8 @@ export const getStaticProps: GetStaticProps<any, { id: string }> = async ({ para
           style: 'currency',
           currency: 'BRL',
         }).format(price.unit_amount as number / 100),
-        description: product.description
+        description: product.description,
+        defaultPriceId: price.id,
       }
     },
   }
