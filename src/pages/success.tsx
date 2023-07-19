@@ -13,7 +13,7 @@ interface SuccessProps {
   }
 }
 
-export default function Success({customerName,product}:SuccessProps) {
+export default function Success({ customerName, product }: SuccessProps) {
   return (
     <SuccessContainer>
       <h1>Compra Efetuada</h1>
@@ -33,6 +33,15 @@ export default function Success({customerName,product}:SuccessProps) {
 }
 
 export const getServerSideProps: GetServerSideProps = async ({ query, params }) => {
+
+  if (!query.session_id) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    }
+  }
   const sessionId = String(query.session_id)
 
   const session = await stripe.checkout.sessions.retrieve(sessionId, {
